@@ -48,10 +48,13 @@ public class UserController {
 		// @ResponseBody means the returned String is the response, not a view name
 		// @RequestParam means it is a parameter from the GET or POST request
 		User n = userRepository.findById(Integer.parseInt(userId)).orElse(null);
-		n.setName(name);
-		n.setEmail(email);
-		userRepository.save(n);
-		return "Updated user "+name;
+		if(n != null){
+			n.setName(name);
+			n.setEmail(email);
+			userRepository.save(n);
+			return "Updated user "+name;
+		}
+		return "User "+userId+" not found";
 	}
 
 	@RequestMapping(path="/{userId}", method=RequestMethod.DELETE)
@@ -61,7 +64,7 @@ public class UserController {
 			userRepository.delete(n);
 			return "Deleted user "+n.getName();
 		}
-		return "Not existing user with id "+userId;
+		return "User "+userId+" not found";
 	}
 
 }
