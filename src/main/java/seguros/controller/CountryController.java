@@ -2,16 +2,14 @@ package seguros.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.web.bind.annotation.*;
+import seguros.beans.CountryBean;
+import seguros.beans.UserBean;
 import seguros.models.Country;
 import seguros.repositories.CountryRepository;
+import seguros.utils.ListUtils;
+
+import java.util.List;
 
 @Controller
 @RequestMapping(path="/country")
@@ -21,45 +19,52 @@ public class CountryController{
 	private CountryRepository countryRepository;
 
 	@GetMapping()
-	public @ResponseBody Iterable<Country> getAllCountries() {
-		return countryRepository.findAll();
+	public @ResponseBody List<CountryBean> getAllCountries() {
+		return CountryBean.getBeans(ListUtils.convertToList(countryRepository.findAll()));
 	}
 
 	@GetMapping(path="/{countryId}")
-	public @ResponseBody Country getCountry(@PathVariable("countryId") String countryId) {
-		return countryRepository.findById(Integer.parseInt(countryId)).orElse(null);
+	public @ResponseBody CountryBean getCountry(@PathVariable("countryId") String countryId) {
+		Country c = countryRepository.findById(Integer.parseInt(countryId)).orElse(null);
+		if(c == null) return null;
+		return new CountryBean(c);
 	}
 
 	@RequestMapping(method=RequestMethod.POST)
-	public @ResponseBody String addNewCountry (@RequestParam String name, @RequestParam String phonePrefix) {
+	public @ResponseBody CountryBean addNewCountry (@RequestParam String name, @RequestParam String phonePrefix) {
 		Country c = new Country();
 		c.setName(name);
 		c.setPhonePrefix(phonePrefix);
 		countryRepository.save(c);
-		return "Created new Country "+name;
+		return new CountryBean(c);
 	}
 
 	@RequestMapping(path="/{countryId}", method=RequestMethod.PUT)
-	public @ResponseBody String updateCountry (@PathVariable("countryId") String countryId, @RequestPart String name, @RequestPart String phonePrefix) {
+	public @ResponseBody CountryBean updateCountry (@PathVariable("countryId") String countryId, @RequestPart String name, @RequestPart String phonePrefix) {
 		// @ResponseBody means the returned String is the response, not a view name
 		// @RequestParam means it is a parameter from the GET or POST request
 		Country c = countryRepository.findById(Integer.parseInt(countryId)).orElse(null);
-		if(c!=null){
-			c.setName(name);
-			c.setPhonePrefix(phonePrefix);
-			countryRepository.save(c);
-			return "Updated country "+name;
-		}
-		return "Country "+countryId+" not found";
+		if(c == null) return null;
+		c.setName(name);
+		c.setPhonePrefix(phonePrefix);
+		countryRepository.save(c);
+		return new CountryBean(c);
+
 	}
 
 	@RequestMapping(path="/{countryId}", method=RequestMethod.DELETE)
-	public @ResponseBody String deleteCountry (@PathVariable("countryId") String countryId){
+	public @ResponseBody Boolean deleteCountry (@PathVariable("countryId") String countryId){
 		Country c = countryRepository.findById(Integer.parseInt(countryId)).orElse(null);
-		if(c!= null){
-			countryRepository.delete(c);
-			return "Deleted Country "+c.getName();
-		}
-		return "Country "+countryId+" not found";
+		if(c==null) return false;
+		countryRepository.delete(c);
+		return true;
+
+	}
+
+	@RequestMapping(path="/{countryId}/users", method = RequestMethod.GET)
+	public @ResponseBody List<UserBean> getUsersByCountry(@PathVariable("countryId") String countryId){
+		Country c = countryRepository.findById(Integer.parseInt(countryId)).orElse(null);
+		if(c==null) return null;
+		return UserBean.getBeans(c.getUsers());
 	}
 }

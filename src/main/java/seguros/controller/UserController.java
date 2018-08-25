@@ -2,18 +2,15 @@ package seguros.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
-
+import org.springframework.web.bind.annotation.*;
+import seguros.beans.UserBean;
 import seguros.models.Country;
 import seguros.models.User;
 import seguros.repositories.CountryRepository;
 import seguros.repositories.UserRepository;
+import seguros.utils.ListUtils;
+
+import java.util.List;
 
 @Controller    // This means that this class is a Controller
 @RequestMapping(path="/user") // This means URL's start with /user (after Application path)
@@ -25,19 +22,21 @@ public class UserController {
 	private CountryRepository countryRepository;
 
 	@GetMapping()
-	public @ResponseBody Iterable<User> getAllUsers() {
+	public @ResponseBody List<UserBean> getAllUsers() {
 		// This returns a JSON or XML with the users
-		return userRepository.findAll();
+		return UserBean.getBeans(ListUtils.convertToList(userRepository.findAll()));
 	}
 
 	@GetMapping(path="/{userId}")
-	public @ResponseBody User getUser(@PathVariable("userId") String userId) {
-		return userRepository.findById(Integer.parseInt(userId)).orElse(null);
+	public @ResponseBody UserBean getUser(@PathVariable("userId") String userId) {
+		User u = userRepository.findById(Integer.parseInt(userId)).orElse(null);
+		if(u == null) return null;
+		return new UserBean(u);
 	}
 
 	//@GetMapping(path="/add") // Map ONLY GET Requests == @RequestMapping(method=GET)
 	@RequestMapping(method=RequestMethod.POST)
-	public @ResponseBody String addNewUser (@RequestParam String name, @RequestParam String email, @RequestParam Integer countryId) {
+	public @ResponseBody UserBean addNewUser (@RequestParam String name, @RequestParam String email, @RequestParam Integer countryId) {
 		// @ResponseBody means the returned String is the response, not a view name
 		// @RequestParam means it is a parameter from the GET or POST request
 		Country c = countryRepository.findById(countryId).orElse(null);
@@ -47,31 +46,29 @@ public class UserController {
 		n.setEmail(email);
 		n.setCountry(c);
 		userRepository.save(n);
-		return "Created new user "+name;
+		return new UserBean(n);
 	}
 
 	@RequestMapping(path="/{userId}", method=RequestMethod.PUT)
-	public @ResponseBody String updateUser (@PathVariable("userId") String userId, @RequestPart String name, @RequestPart String email, @RequestPart Integer countryId) {
+	public @ResponseBody UserBean updateUser (@PathVariable("userId") String userId, @RequestPart String name, @RequestPart String email, @RequestPart Integer countryId) {
 		// @ResponseBody means the returned String is the response, not a view name
 		// @RequestParam means it is a parameter from the GET or POST request
 		User n = userRepository.findById(Integer.parseInt(userId)).orElse(null);
-		if(n == null) return "User "+userId+" not found";
+		if(n == null) return null;
 		Country c = countryRepository.findById(countryId).orElse(null);
 		n.setName(name);
 		n.setEmail(email);
 		n.setCountry(c);
 		userRepository.save(n);
-		return "Updated user "+name;
+		return new UserBean(n);
 	}
 
 	@RequestMapping(path="/{userId}", method=RequestMethod.DELETE)
-	public @ResponseBody String deleteUser (@PathVariable("userId") String userId){
+	public @ResponseBody Boolean deleteUser (@PathVariable("userId") String userId){
 		User n = userRepository.findById(Integer.parseInt(userId)).orElse(null);
-		if(n!= null){
-			userRepository.delete(n);
-			return "Deleted user "+n.getName();
-		}
-		return "User "+userId+" not found";
+		if(n== null) return false;
+		userRepository.delete(n);
+		return true;
 	}
 
 }
