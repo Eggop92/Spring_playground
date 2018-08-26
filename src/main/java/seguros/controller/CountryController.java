@@ -13,7 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(path="/country")
-public class CountryController{
+public class CountryController extends BaseController{
 
 	@Autowired
 	private CountryRepository countryRepository;

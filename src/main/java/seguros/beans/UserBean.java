@@ -18,7 +18,7 @@ public class UserBean{
 		this.id = user.getId();
 		this.name = user.getName();
 		this.email = user.getEmail();
-		this.country = new CountryBean(user.getCountry());
+		this.country = (user.getCountry()!= null)?new CountryBean(user.getCountry()):null;
 	}
 
 	public Integer getId() {return id;}
