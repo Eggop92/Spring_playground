@@ -12,7 +12,7 @@ import seguros.utils.ListUtils;
 
 import java.util.List;
 
-@Controller    // This means that this class is a Controller
+@RestController    // This means that this class is a Controller
 @RequestMapping(path="/user") // This means URL's start with /user (after Application path)
 public class UserController  extends BaseController {
 	@Autowired // This means to get the bean called userRepository

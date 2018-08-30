@@ -9,6 +9,7 @@ import seguros.models.Country;
 import seguros.repositories.CountryRepository;
 import seguros.utils.ListUtils;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Controller
@@ -31,10 +32,10 @@ public class CountryController extends BaseController{
 	}
 
 	@RequestMapping(method=RequestMethod.POST)
-	public @ResponseBody CountryBean addNewCountry (@RequestParam String name, @RequestParam String phonePrefix) {
-		Country c = new Country();
-		c.setName(name);
-		c.setPhonePrefix(phonePrefix);
+	public @ResponseBody CountryBean addNewCountry (@RequestBody @Valid Country c) {
+		//Country c = new Country();
+		//c.setName(name);
+		//c.setPhonePrefix(phonePrefix);
 		countryRepository.save(c);
 		return new CountryBean(c);
 	}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html ng-app="spring_playground">
+<head>
+    <meta charset="UTF-8" />
+    <title>Spring Playground</title>
+</head>
+
+<body ng-app="spring_playground" ng-controller="CountryController" ng-init="getAllCountries()">
+
+<div class="container" ng-show="countries != null">
+    <div class="country-info-bottom" ng-repeat="country in countries">
+        <h4><span> {{country.id}} - {{country.name}} - {{country.phonePrefix}} </span></h4>
+    </div>
+</div>
+
+<div class="form">
+
+    <label for="name">Nombre:</label>
+    <input id="name" ng-model="name" type="text" />
+
+    <label for="phonePrefix">PhonePrefix:</label>
+    <input id="phonePrefix" ng-model="phonePrefix" type="text" />
+
+    <button id="addBtn" class="btn" ng-click="addNewCountry()">Add Country</button>
+</div>
+
+<h4>{{msg}}</h4>
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.21/angular-resource.js"></script>
+<script src="../static/js/services.js"></script>
+</body>
+</html>
